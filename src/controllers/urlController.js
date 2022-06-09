@@ -22,3 +22,20 @@ export async function shortenUrl(req, res){
         res.status(500).send(e)
     }
 }
+
+export async function getUrl(req, res){
+    const {id} = req.params
+    console.log(id)
+    try{
+        const db = await connectDB()
+        const {rows} = await db.query('SELECT id, "shortUrl", url FROM urls WHERE id=$1',[parseInt(id)])
+        console.log(rows)
+        if(!rows.length){
+            res.sendStatus(404)
+        }
+            res.status(200).send(rows[0])
+    }catch(e){
+        console.log(e)
+        res.status(500).send(e)
+    }
+}
