@@ -1,4 +1,5 @@
 import Joi from "joi"
+import {v4 as uuidv4} from "uuid"
 import connectDB from "../app/db.js"
 
 export async function registerUser(req,res){
@@ -20,7 +21,7 @@ export async function registerUser(req,res){
         res.sendStatus(201)
     }catch(e){
         console.log(e)
-        res.status(500).send(e)
+        res.status(500).send(e.detail)
     }
 }
 
@@ -36,14 +37,16 @@ export async function loginUser(req,res){
     }
     try{
         const db = await connectDB()
-        const verification = await db.query('SELECT users.email, users.password FROM users WHERE users.email = $1 AND users.password = $2',[userLogin.email, userLogin.password])
+        const verification = await db.query('SELECT users.id, users.email, users.password FROM users WHERE users.email = $1 AND users.password = $2',[userLogin.email, userLogin.password])
         if(verification.rows.length){
-            res.sendStatus(200)
+            await db.query('INSERT INTO sessions (token, "userId") VALUES ($1,$2)',[uuidv4(), verification.rows[0].id])
+            res.status(200).send(uuidv4())
         }
         else{
             res.sendStatus(401)
         }
     }catch(e){
-        res.status(500).send("Database connection error")
+        console.log(e)
+        res.status(500).send(e.detail)
     }
 }
