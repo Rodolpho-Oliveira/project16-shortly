@@ -15,7 +15,7 @@ export async function shortenUrl(req, res){
     }
     try{
         const db = await connectDB()
-        await db.query('INSERT INTO urls (url,"shortUrl","visitCount","userId") VALUES ($1,$2,$3,$4)',[url,shortUrl,null,user])
+        await db.query('INSERT INTO urls (url,"shortUrl","visitCount","userId") VALUES ($1,$2,$3,$4)',[url,shortUrl,0,user])
         res.status(201).send({shortUrl: shortUrl})
     }catch(e){
         console.log(e)
@@ -25,17 +25,30 @@ export async function shortenUrl(req, res){
 
 export async function getUrl(req, res){
     const {id} = req.params
-    console.log(id)
     try{
         const db = await connectDB()
         const {rows} = await db.query('SELECT id, "shortUrl", url FROM urls WHERE id=$1',[parseInt(id)])
         console.log(rows)
         if(!rows.length){
-            res.sendStatus(404)
+            return res.sendStatus(404)
         }
             res.status(200).send(rows[0])
     }catch(e){
-        console.log(e)
+        res.status(500).send(e)
+    }
+}
+
+export async function getRedirectUrl(req,res){
+    const {shortUrl} = req.params
+    try{
+        const db = await connectDB()
+        const {rows} = await db.query('SELECT url FROM urls WHERE "shortUrl"=$1',[shortUrl])
+        if(!rows.length){
+            return res.sendStatus(404)
+        }
+        await db.query('UPDATE urls SET "visitCount"= "visitCount" + 1 WHERE "shortUrl"=$1',[shortUrl])
+        res.redirect(rows[0].url)
+    }catch(e){
         res.status(500).send(e)
     }
 }
