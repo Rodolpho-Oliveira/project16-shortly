@@ -52,3 +52,22 @@ export async function getRedirectUrl(req,res){
         res.status(500).send(e)
     }
 }
+
+export async function removeUrl(req, res){
+    const {id} = req.params
+    try{
+        const db = await connectDB()
+        const {rows} = await db.query('SELECT * FROM urls WHERE id=$1',[id])
+        if(!rows.length){
+            return res.sendStatus(404)
+        }
+        if(res.locals.user.id === rows[0].userId){
+            await db.query('DELETE FROM urls WHERE "userId"=$1 AND id=$2',[res.locals.user.id, id])
+            return res.sendStatus(204)
+        }
+        res.sendStatus(401)
+    }catch(e){
+        console.log(e)
+        res.status(500).send(e)
+    }
+}
