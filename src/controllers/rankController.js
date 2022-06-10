@@ -3,11 +3,11 @@ import connectDB from "../app/db.js"
 export async function showRank(req,res){
     try{
         const db = await connectDB()
-        const {rows} = await db.query(`SELECT urls."userId", users.name, COUNT(urls.url) as "linksCount", SUM(urls."visitCount") as "visitCount" 
+        const {rows} = await db.query(`SELECT users.id, users.email, COUNT(urls.url) as "linksCount", COALESCE(SUM(urls."visitCount"),0) as "visitCount" 
         FROM urls 
-        JOIN users
+        RIGHT JOIN users
         ON users.id = urls."userId"
-        GROUP BY urls."userId", users.name
+        GROUP BY users.id
         ORDER BY "visitCount" DESC
         LIMIT 10`)
         res.status(200).send(rows)
