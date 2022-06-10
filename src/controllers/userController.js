@@ -1,5 +1,6 @@
 import Joi from "joi"
 import {v4 as uuidv4} from "uuid"
+import bcrypt from "bcrypt"
 import connectDB from "../app/db.js"
 
 export async function registerUser(req,res){
@@ -14,10 +15,11 @@ export async function registerUser(req,res){
     if(validation.error){
         return res.status(422).send(validation.error.details[0].message)
     }
-
+    const encryptedPassword = bcrypt.hashSync(userInfo.password,10)
     try{
+        
         const db = await connectDB()
-        await db.query('INSERT INTO users (name,email,password) VALUES ($1,$2,$3)',[userInfo.name,userInfo.email,userInfo.password])
+        await db.query('INSERT INTO users (name,email,password) VALUES ($1,$2,$3)',[userInfo.name,userInfo.email,encryptedPassword])
         res.sendStatus(201)
     }catch(e){
         console.log(e)
@@ -37,8 +39,8 @@ export async function loginUser(req,res){
     }
     try{
         const db = await connectDB()
-        const verification = await db.query('SELECT users.id, users.email, users.password FROM users WHERE users.email = $1 AND users.password = $2',[userLogin.email, userLogin.password])
-        if(verification.rows.length){
+        const verification = await db.query('SELECT users.id, users.email, users.password FROM users WHERE users.email = $1',[userLogin.email])
+        if(verification.rows.length && bcrypt.compareSync(userLogin.password, verification.rows[0].password)){
             await db.query('INSERT INTO sessions (token, "userId") VALUES ($1,$2)',[uuidv4(), verification.rows[0].id])
             res.status(200).send(uuidv4())
         }
