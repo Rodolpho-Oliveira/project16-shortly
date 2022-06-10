@@ -18,7 +18,6 @@ export async function shortenUrl(req, res){
         await db.query('INSERT INTO urls (url,"shortUrl","visitCount","userId") VALUES ($1,$2,$3,$4)',[url,shortUrl,0,user])
         res.status(201).send({shortUrl: shortUrl})
     }catch(e){
-        console.log(e)
         res.status(500).send(e)
     }
 }
@@ -28,7 +27,6 @@ export async function getUrl(req, res){
     try{
         const db = await connectDB()
         const {rows} = await db.query('SELECT id, "shortUrl", url FROM urls WHERE id=$1',[parseInt(id)])
-        console.log(rows)
         if(!rows.length){
             return res.sendStatus(404)
         }
@@ -67,7 +65,6 @@ export async function removeUrl(req, res){
         }
         res.sendStatus(401)
     }catch(e){
-        console.log(e)
         res.status(500).send(e)
     }
 }

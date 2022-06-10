@@ -17,7 +17,6 @@ export async function authToken(req, res, next){
         `)
         res.locals.user = rows[0]
     }catch(e){
-        console.log(e)
         return res.status(500).send(e)
     }
 

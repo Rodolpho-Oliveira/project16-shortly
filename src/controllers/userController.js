@@ -48,7 +48,6 @@ export async function loginUser(req,res){
             res.sendStatus(401)
         }
     }catch(e){
-        console.log(e)
         res.status(500).send(e.detail)
     }
 }
