@@ -42,7 +42,7 @@ export async function loginUser(req,res){
         const verification = await db.query('SELECT users.id, users.email, users.password FROM users WHERE users.email = $1',[userLogin.email])
         if(verification.rows.length && bcrypt.compareSync(userLogin.password, verification.rows[0].password)){
             await db.query('DELETE FROM sessions WHERE "userId"=$1',[verification.rows[0].id])
-            await db.query('INSERT INTO sessions (token, "userId") VALUES ($1,$2)',[uuidv4(), verification.rows[0].id])
+            await db.query('INSERT INTO sessions (token, "userId") VALUES ($1,$2)',["Bearer " + uuidv4(), verification.rows[0].id])
             res.status(200).send(uuidv4())
         }
         else{
