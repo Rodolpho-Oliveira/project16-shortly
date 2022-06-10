@@ -50,3 +50,34 @@ export async function loginUser(req,res){
         res.status(500).send(e.detail)
     }
 }
+
+export async function getUser(req, res){
+    const {id} = req.params
+    try{
+        const db = await connectDB()
+        const user = await db.query('SELECT * FROM users WHERE id=$1',[id])
+        if(!user.rows.length){
+            return res.sendStatus(404)
+        }
+        const {rows} = await db.query(`SELECT urls.id, urls."shortUrl", urls.url, urls."visitCount" FROM urls 
+        JOIN users
+        ON urls."userId" = users.id
+        WHERE urls."userId" = $1`,[id])
+        let url = []
+        let visitCounts = 0
+        rows.forEach((data) => {
+            visitCounts += data.visitCount
+            url.push(data)
+        })
+        const urls = {
+            id: user.rows[0].id,
+            name: user.rows[0].name,
+            visitCount: visitCounts,
+            shortenendUrls: url
+        }
+        res.status(200).send(urls)
+    }catch(e){
+        console.log(e)
+        return res.status(500).send(e)
+    }
+}
