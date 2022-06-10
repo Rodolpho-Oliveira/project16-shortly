@@ -4,11 +4,10 @@ dotenv.config()
 
 let chachedDB = null
 let connectionParams = {
-    host: process.env.DATABASE_HOST,
-    port: process.env.PORT,
-    user: process.env.DATABASE_USER,
-    password: process.env.DATABASE_PASSWORD,
-    database: process.env.DATABASE
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
 }
 
 export default async function connectDB(){
