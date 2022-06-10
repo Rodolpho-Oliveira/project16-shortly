@@ -22,7 +22,6 @@ export async function registerUser(req,res){
         await db.query('INSERT INTO users (name,email,password) VALUES ($1,$2,$3)',[userInfo.name,userInfo.email,encryptedPassword])
         res.sendStatus(201)
     }catch(e){
-        console.log(e)
         res.status(500).send(e.detail)
     }
 }
@@ -41,9 +40,10 @@ export async function loginUser(req,res){
         const db = await connectDB()
         const verification = await db.query('SELECT users.id, users.email, users.password FROM users WHERE users.email = $1',[userLogin.email])
         if(verification.rows.length && bcrypt.compareSync(userLogin.password, verification.rows[0].password)){
+            const token = uuidv4()
             await db.query('DELETE FROM sessions WHERE "userId"=$1',[verification.rows[0].id])
-            await db.query('INSERT INTO sessions (token, "userId") VALUES ($1,$2)',["Bearer " + uuidv4(), verification.rows[0].id])
-            res.status(200).send(uuidv4())
+            await db.query('INSERT INTO sessions (token, "userId") VALUES ($1,$2)',[token, verification.rows[0].id])
+            res.status(200).send(token)
         }
         else{
             res.sendStatus(401)
@@ -79,7 +79,6 @@ export async function getUser(req, res){
         }
         res.status(200).send(urls)
     }catch(e){
-        console.log(e)
         return res.status(500).send(e)
     }
 }

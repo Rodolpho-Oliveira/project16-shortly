@@ -59,8 +59,8 @@ export async function removeUrl(req, res){
         if(!rows.length){
             return res.sendStatus(404)
         }
-        if(res.locals.user.id === rows[0].userId){
-            await db.query('DELETE FROM urls WHERE "userId"=$1 AND id=$2',[res.locals.user.id, id])
+        if(res.locals.user.userId === rows[0].userId){
+            await db.query('DELETE FROM urls WHERE "userId"=$1 AND id=$2',[res.locals.user.userId, id])
             return res.sendStatus(204)
         }
         res.sendStatus(401)
