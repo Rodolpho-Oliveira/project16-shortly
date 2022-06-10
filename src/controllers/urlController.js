@@ -4,7 +4,7 @@ import Joi from "joi"
 
 export async function shortenUrl(req, res){
     const {url} = req.body
-    const user = res.locals.user.id
+    const user = res.locals.user.userId
     const shortUrl = nanoid()
     const urlSchema = Joi.object({
         url: Joi.string().uri().required()
